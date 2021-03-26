@@ -5,7 +5,7 @@ class Result extends StatefulWidget {
   final plant;
   final imageLogo;
 
-  const Result({Key key, this.image, this.plant, this.imageLogo})
+  const Result({Key? key, this.image, this.plant, this.imageLogo})
       : super(key: key);
   @override
   _ResultState createState() => _ResultState();

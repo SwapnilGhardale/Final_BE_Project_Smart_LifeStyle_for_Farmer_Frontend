@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'package:flutter/services.dart';
+//import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:images_picker/images_picker.dart';
 import 'package:plant_disease_detector/data/plants.dart';
 import 'package:plant_disease_detector/ui/mydrawer.dart';
 import 'package:plant_disease_detector/ui/result.dart';
@@ -14,8 +14,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String selectedPlant = '';
   String selectedPlantLogo = '';
-  File _image;
-  final picker = ImagePicker();
+  late String imagePath;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +63,7 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(Icons.photo),
               title: Text('Gallery'),
               onTap: () {
-                getImage(ImageSource.gallery);
+                getGalleryImage();
               },
             ),
             Divider(),
@@ -72,7 +71,7 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(Icons.camera_alt),
               title: Text('Camera'),
               onTap: () {
-                getImage(ImageSource.camera);
+                getCameraImage();
               },
             ),
             Divider(),
@@ -90,24 +89,42 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future getImage(_source) async {
-    picker.getImage(source: _source).then((pickedFile) {
-      setState(() {
-        if (pickedFile != null) {
-          _image = File(pickedFile.path);
-        } else {
-          print('No image selected.');
-        }
-      });
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) => Result(
-            image: _image,
-            plant: selectedPlant,
-            imageLogo: selectedPlantLogo,
-          ),
-        ),
-      );
+  getGalleryImage() async {
+    ImagesPicker.pick(
+      count: 1,
+      pickType: PickType.image,
+    ).then((res) {
+      if (res != null) {
+        setState(() {
+          imagePath = res[0].thumbPath!;
+        });
+        displayResult();
+      }
     });
+  }
+
+  getCameraImage() {
+    ImagesPicker.openCamera(
+      pickType: PickType.image,
+    ).then((res) {
+      if (res != null) {
+        setState(() {
+          imagePath = res[0].thumbPath!;
+        });
+        displayResult();
+      }
+    });
+  }
+
+  displayResult() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) => Result(
+          image: File(imagePath),
+          plant: selectedPlant,
+          imageLogo: selectedPlantLogo,
+        ),
+      ),
+    );
   }
 }
