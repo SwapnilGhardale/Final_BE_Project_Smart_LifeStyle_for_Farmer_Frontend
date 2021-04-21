@@ -91,7 +91,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   getImage(ImageSource imageSource) async {
-    _picker.getImage(source: imageSource).then((res) {
+    _picker
+        .getImage(
+      source: imageSource,
+      maxHeight: 256,
+      maxWidth: 256,
+    )
+        .then((res) {
       if (res != null) {
         setState(() {
           selectedImagePath = res.path;

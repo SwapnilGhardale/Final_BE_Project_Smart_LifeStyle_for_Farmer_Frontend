@@ -45,8 +45,8 @@ class _ResultState extends State<Result> {
       }
       setState(() {
         loading = false;
+        print(serverResponse);
       });
-      print(serverResponse);
     });
   }
 
@@ -73,7 +73,7 @@ class _ResultState extends State<Result> {
               ),
             ),
           ),
-          Image.file(File(widget.imagePath)),
+          Image.file(File(widget.imagePath), fit: BoxFit.contain),
           Card(
             child: loading
                 ? ListTile(
