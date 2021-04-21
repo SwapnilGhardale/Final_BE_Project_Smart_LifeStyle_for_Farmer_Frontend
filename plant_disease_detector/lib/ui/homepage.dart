@@ -1,7 +1,5 @@
-import 'dart:io';
-//import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:images_picker/images_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:plant_disease_detector/data/plants.dart';
 import 'package:plant_disease_detector/ui/mydrawer.dart';
 import 'package:plant_disease_detector/ui/result.dart';
@@ -12,9 +10,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final _picker = ImagePicker();
   String selectedPlant = '';
   String selectedPlantLogo = '';
-  late String imagePath;
+  String selectedImagePath = '';
+  int selectedIndex = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +29,15 @@ class _HomePageState extends State<HomePage> {
           ListView.separated(
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            itemCount: plants.length,
+            itemCount: demoPlants.length,
             itemBuilder: (BuildContext context, int index) {
               return ListTile(
-                leading: Image.asset(plants[index]['image']),
-                title: Text(plants[index]['name']),
+                leading: Image.asset(demoPlants[index]['image']),
+                title: Text(demoPlants[index]['name']),
                 onTap: () {
-                  selectedPlant = plants[index]['name'];
-                  selectedPlantLogo = plants[index]['image'];
+                  selectedPlant = demoPlants[index]['name'];
+                  selectedPlantLogo = demoPlants[index]['image'];
+                  selectedIndex = index + 1;
                   plantTapped();
                 },
               );
@@ -63,7 +64,7 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(Icons.photo),
               title: Text('Gallery'),
               onTap: () {
-                getGalleryImage();
+                getImage(ImageSource.gallery);
               },
             ),
             Divider(),
@@ -71,7 +72,7 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(Icons.camera_alt),
               title: Text('Camera'),
               onTap: () {
-                getCameraImage();
+                getImage(ImageSource.camera);
               },
             ),
             Divider(),
@@ -89,42 +90,23 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  getGalleryImage() async {
-    ImagesPicker.pick(
-      count: 1,
-      pickType: PickType.image,
-    ).then((res) {
+  getImage(ImageSource imageSource) async {
+    _picker.getImage(source: imageSource).then((res) {
       if (res != null) {
         setState(() {
-          imagePath = res[0].thumbPath!;
+          selectedImagePath = res.path;
         });
-        displayResult();
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) => Result(
+              imagePath: selectedImagePath,
+              plant: selectedPlant,
+              imageLogo: selectedPlantLogo,
+              plantIndex: selectedIndex,
+            ),
+          ),
+        );
       }
     });
-  }
-
-  getCameraImage() {
-    ImagesPicker.openCamera(
-      pickType: PickType.image,
-    ).then((res) {
-      if (res != null) {
-        setState(() {
-          imagePath = res[0].thumbPath!;
-        });
-        displayResult();
-      }
-    });
-  }
-
-  displayResult() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) => Result(
-          image: File(imagePath),
-          plant: selectedPlant,
-          imageLogo: selectedPlantLogo,
-        ),
-      ),
-    );
   }
 }

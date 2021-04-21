@@ -56,3 +56,26 @@ List plants = [
     'image': 'assets/tomato.JPG',
   },
 ];
+
+List demoPlants = [
+  {
+    'name': 'Tomato',
+    'image': 'assets/tomato.JPG',
+  },
+  {
+    'name': 'Potato',
+    'image': 'assets/potato.JPG',
+  },
+  {
+    'name': 'Grape',
+    'image': 'assets/grape.JPG',
+  },
+  {
+    'name': 'Corn',
+    'image': 'assets/corn.jpg',
+  },
+  {
+    'name': 'Strawberry',
+    'image': 'assets/strawberry.JPG',
+  },
+];
