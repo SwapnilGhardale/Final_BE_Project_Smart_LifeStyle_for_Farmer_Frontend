@@ -11,10 +11,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _picker = ImagePicker();
-  String selectedPlant = '';
-  String selectedPlantLogo = '';
-  String selectedImagePath = '';
-  int selectedIndex = 1;
+  late Plant selectedPlant;
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +32,11 @@ class _HomePageState extends State<HomePage> {
                 leading: Image.asset(demoPlants[index]['image']),
                 title: Text(demoPlants[index]['name']),
                 onTap: () {
-                  selectedPlant = demoPlants[index]['name'];
-                  selectedPlantLogo = demoPlants[index]['image'];
-                  selectedIndex = index + 1;
+                  selectedPlant = Plant(
+                    demoPlants[index]['id'],
+                    demoPlants[index]['name'],
+                    demoPlants[index]['image'],
+                  );
                   plantTapped();
                 },
               );
@@ -94,21 +93,16 @@ class _HomePageState extends State<HomePage> {
     _picker
         .getImage(
       source: imageSource,
-      maxHeight: 256,
-      maxWidth: 256,
+      maxHeight: 512,
+      maxWidth: 512,
     )
         .then((res) {
       if (res != null) {
-        setState(() {
-          selectedImagePath = res.path;
-        });
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) => Result(
-              imagePath: selectedImagePath,
-              plant: selectedPlant,
-              imageLogo: selectedPlantLogo,
-              plantIndex: selectedIndex,
+              imagePath: res.path,
+              currentPlant: selectedPlant,
             ),
           ),
         );
