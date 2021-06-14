@@ -5,14 +5,11 @@ import 'package:http/http.dart' as http;
 import 'package:plant_disease_detector/data/plants.dart';
 
 class Result extends StatefulWidget {
-  final Plant currentPlant;
+  final Plant plant;
   final String imagePath;
 
-  const Result({
-    Key? key,
-    required this.currentPlant,
-    required this.imagePath,
-  }) : super(key: key);
+  const Result({Key? key, required this.plant, required this.imagePath})
+      : super(key: key);
   @override
   _ResultState createState() => _ResultState();
 }
@@ -24,11 +21,12 @@ class _ResultState extends State<Result> {
   getResult() async {
     var request =
         http.MultipartRequest('POST', Uri.parse('http://3.143.155.80/predict'));
-    request.fields.addAll({'plant': widget.currentPlant.plantId});
+    request.fields.addAll({'plant': widget.plant.plantId});
     request.files
         .add(await http.MultipartFile.fromPath('file', widget.imagePath));
 
     await request.send().then((response) async {
+      print(response.statusCode);
       if (response.statusCode == 200) {
         response.stream.bytesToString().then((value) {
           setState(() {
@@ -55,34 +53,37 @@ class _ResultState extends State<Result> {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Result'),
-      ),
-      body: ListView(
-        children: [
-          Card(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: ListTile(
-                leading: Image.asset(widget.currentPlant.plantImage),
-                title: Text(widget.currentPlant.plantName),
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              expandedHeight: size.width * 0.8,
+              pinned: true,
+              title: Text(
+                widget.plant.plantName,
+              ),
+              flexibleSpace: FlexibleSpaceBar(
+                background: Image.file(
+                  File(widget.imagePath),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          Card(
-            child: loading
-                ? ListTile(
-                    title: Text('Detecting Disease...'),
-                    subtitle: LinearProgressIndicator(),
-                  )
-                : ListTile(
-                    title: Text('Disease Detected : ' + serverResponse),
-                  ),
-          ),
-          Image.file(File(widget.imagePath), fit: BoxFit.fitWidth),
-          SizedBox(height: 100),
-        ],
+            SliverList(
+              delegate: SliverChildListDelegate([
+                loading
+                    ? ListTile(
+                        subtitle: LinearProgressIndicator(),
+                      )
+                    : ListTile(
+                        title: Text(serverResponse),
+                      ),
+              ]),
+            ),
+          ],
+        ),
       ),
     );
   }

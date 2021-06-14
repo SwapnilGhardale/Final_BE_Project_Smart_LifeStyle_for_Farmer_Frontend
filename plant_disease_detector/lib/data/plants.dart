@@ -4,6 +4,11 @@ class Plant {
   final String plantImage;
 
   Plant(this.plantId, this.plantName, this.plantImage);
+
+  Plant.fromMap(Map<String, String> map)
+      : this.plantId = map['id']!,
+        this.plantName = map['name']!,
+        this.plantImage = map['image']!;
 }
 
 List plants = [
@@ -58,7 +63,7 @@ List plants = [
     'image': 'assets/raspberry.JPG',
   },
   {
-    'id': 'sb',
+    'id': 'sy',
     'name': 'Soybean',
     'image': 'assets/soybean.JPG',
   },

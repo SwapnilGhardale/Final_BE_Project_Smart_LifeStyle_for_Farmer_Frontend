@@ -11,28 +11,30 @@ class _MyDrawerState extends State<MyDrawer> {
     return Drawer(
       child: ListView(
         children: [
-          SizedBox(
-            height: 50,
-          ),
-          ListTile(
-            title: Text(
-              'Plant',
-              style: TextStyle(fontSize: 20),
+          Container(
+            height: 200,
+            padding: EdgeInsets.only(left: 20, top: 20),
+            color: Theme.of(context).backgroundColor,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Plant',
+                  style: TextStyle(fontSize: 20),
+                ),
+                Text(
+                  'Disease',
+                  style: TextStyle(fontSize: 23),
+                ),
+                Text(
+                  'Detector',
+                  style: TextStyle(fontSize: 28),
+                ),
+              ],
             ),
           ),
-          ListTile(
-            title: Text(
-              'Disease',
-              style: TextStyle(fontSize: 22),
-            ),
-          ),
-          ListTile(
-            title: Text(
-              'Detector',
-              style: TextStyle(fontSize: 24),
-            ),
-          ),
-          Divider(),
+          SizedBox(height: 10),
           ListTile(
             leading: Icon(Icons.translate_outlined),
             title: Text('Change Language'),

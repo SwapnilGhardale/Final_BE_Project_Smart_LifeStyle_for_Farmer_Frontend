@@ -1,5 +1,5 @@
 name: plant_disease_detector
-description: A new Flutter project.
+description: Final year project.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -27,9 +27,8 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
-  image_picker: ^0.7.4
-  http: ^0.13.1
+  image_picker: ^0.8.0+3
+  http: ^0.13.3
 
 dev_dependencies:
   flutter_test:
@@ -49,6 +48,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/translations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
