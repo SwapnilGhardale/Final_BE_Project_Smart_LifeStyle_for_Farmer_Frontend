@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert' as convert;
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -17,31 +18,38 @@ class Result extends StatefulWidget {
 class _ResultState extends State<Result> {
   bool loading = true;
   String serverResponse = '';
+  double confidence = 0.0;
+  var details;
 
   getResult() async {
+    print('sending image to server');
     var request =
         http.MultipartRequest('POST', Uri.parse('http://3.143.155.80/predict'));
-    request.fields.addAll({'plant': widget.plant.plantId});
+    request.fields.addAll({'plant_id': widget.plant.plantId});
     request.files
         .add(await http.MultipartFile.fromPath('file', widget.imagePath));
+    print('sending request');
 
     await request.send().then((response) async {
       print(response.statusCode);
       if (response.statusCode == 200) {
-        response.stream.bytesToString().then((value) {
-          setState(() {
-            serverResponse = value;
-          });
+        response.stream.bytesToString().then((body) {
+          var jsonBody = convert.jsonDecode(body);
+          if (jsonBody['status'] == 'OK') {
+            confidence = double.parse(jsonBody['conf']);
+            details = jsonBody['output'];
+          } else {
+            serverResponse = 'Leaf/Disease not detected.';
+          }
         });
       } else {
-        setState(() {
-          serverResponse = response.reasonPhrase!;
-        });
+        serverResponse = response.reasonPhrase!;
       }
-      setState(() {
-        loading = false;
-        print(serverResponse);
-      });
+    });
+
+    print(serverResponse);
+    setState(() {
+      loading = false;
     });
   }
 
@@ -72,19 +80,55 @@ class _ResultState extends State<Result> {
               ),
             ),
             SliverList(
-              delegate: SliverChildListDelegate([
-                loading
-                    ? ListTile(
-                        subtitle: LinearProgressIndicator(),
-                      )
-                    : ListTile(
-                        title: Text(serverResponse),
-                      ),
-              ]),
+              delegate: SliverChildListDelegate(
+                buildResult(),
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  buildResult() {
+    List<Widget> widgetList = [];
+    if (loading) {
+      widgetList.add(ListTile(
+        subtitle: LinearProgressIndicator(),
+      ));
+    } else {
+      if (serverResponse.isNotEmpty) {
+        widgetList.add(ListTile(
+          title: Text(serverResponse),
+        ));
+      } else {
+        if (details['disease_name'] == 'Healthy') {
+          widgetList.add(ListTile(
+            title: Text(details == null ? '' : 'This plant is healthy!'),
+          ));
+        } else {
+          widgetList.add(ListTile(
+            title: Text(details == null ? '' : details['disease_name']),
+          ));
+          widgetList.add(ListTile(
+            title: Text('Causes'),
+            subtitle: Text(details == null ? '' : details['causes']),
+          ));
+          widgetList.add(ListTile(
+            title: Text('Symptoms'),
+            subtitle: Text(details == null ? '' : details['symptoms']),
+          ));
+          widgetList.add(ListTile(
+            title: Text('Preventions'),
+            subtitle: Text(details == null ? '' : details['preventions']),
+          ));
+          widgetList.add(ListTile(
+            title: Text('Useful Pesticides'),
+            subtitle: Text(details == null ? '' : details['pesticides']),
+          ));
+        }
+      }
+    }
+    return widgetList;
   }
 }

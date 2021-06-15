@@ -36,14 +36,19 @@ class _MyDrawerState extends State<MyDrawer> {
           ),
           SizedBox(height: 10),
           ListTile(
-            leading: Icon(Icons.translate_outlined),
-            title: Text('Change Language'),
-            onTap: () {},
+            subtitle: Text('Steps'),
           ),
           ListTile(
-            leading: Icon(Icons.help_outline),
-            title: Text('Help'),
-            onTap: () {},
+            leading: Icon(Icons.touch_app_outlined),
+            title: Text('Select plant'),
+          ),
+          ListTile(
+            leading: Icon(Icons.wallpaper),
+            title: Text('Pick image'),
+          ),
+          ListTile(
+            leading: Icon(Icons.subject),
+            title: Text('Get result'),
           ),
         ],
       ),

@@ -1,4 +1,7 @@
+import 'dart:convert' as convert;
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:plant_disease_detector/data/plants.dart';
 import 'package:plant_disease_detector/ui/result.dart';
@@ -12,6 +15,36 @@ class PlantDetails extends StatefulWidget {
 }
 
 class _PlantDetailsState extends State<PlantDetails> {
+  bool loading = true;
+  String serverResponse = '';
+  List<dynamic> infoList = [];
+
+  getInfo() async {
+    var request =
+        MultipartRequest('POST', Uri.parse('http://3.143.155.80/plant_info'));
+    request.fields.addAll({'plant_id': widget.plant.plantId});
+
+    StreamedResponse response = await request.send();
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      String body = await response.stream.bytesToString();
+      var jsonBody = convert.jsonDecode(body);
+      infoList = jsonBody['info'];
+    } else {
+      serverResponse = response.reasonPhrase!;
+    }
+    setState(() {
+      loading = false;
+      print(serverResponse);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getInfo();
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -29,7 +62,7 @@ class _PlantDetailsState extends State<PlantDetails> {
             ),
             SliverList(
               delegate: SliverChildListDelegate(
-                diseaseList(),
+                buildInfoList(),
               ),
             ),
           ],
@@ -38,37 +71,46 @@ class _PlantDetailsState extends State<PlantDetails> {
     );
   }
 
-  diseaseList() {
-    List<Widget> list = [];
-    for (int i = 0; i < 5; i++) {
-      list.add(
-        ExpansionTile(
-          title: Text('Apple Scab'),
-          children: [
-            ListTile(
-              title: Text('Causes'),
-              subtitle: Text('It is caused by fungus Venturia inaequalis.'),
+  buildInfoList() {
+    List<Widget> widgetList = [];
+    if (loading) {
+      widgetList.add(ListTile(
+        subtitle: LinearProgressIndicator(),
+      ));
+    } else {
+      if (serverResponse.isNotEmpty) {
+        widgetList.add(ListTile(
+          title: Text(serverResponse),
+        ));
+      } else {
+        infoList.forEach((element) {
+          widgetList.add(
+            ExpansionTile(
+              title: Text(element['disease_name'] ?? ''),
+              children: [
+                ListTile(
+                  title: Text('Causes'),
+                  subtitle: Text(element['causes'] ?? ''),
+                ),
+                ListTile(
+                  title: Text('Symptoms'),
+                  subtitle: Text(element['symptoms'] ?? ''),
+                ),
+                ListTile(
+                  title: Text('Preventions'),
+                  subtitle: Text(element['preventions'] ?? ''),
+                ),
+                ListTile(
+                  title: Text('Useful Pesticides'),
+                  subtitle: Text(element['pesticides'] ?? ''),
+                ),
+              ],
             ),
-            ListTile(
-              title: Text('Symptoms'),
-              subtitle: Text(
-                  'Twisted and puckered leaves that have black, circular scabby spots on the underside.'),
-            ),
-            ListTile(
-              title: Text('Preventions'),
-              subtitle: Text(
-                  'Thoroughly remove fallen leaves, not only in the fall, but also during the growing season.'),
-            ),
-            ListTile(
-              title: Text('Useful Pesticides'),
-              subtitle: Text(
-                  'Bonide Sulfur Plant Fungicide, Organocide Plant Doctor, Bonide Orchard Spray.'),
-            ),
-          ],
-        ),
-      );
+          );
+        });
+      }
     }
-    return list;
+    return widgetList;
   }
 
   FlexibleSpaceBar buildFlexibleSpaceBar() {
